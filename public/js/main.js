@@ -6,6 +6,12 @@ const headerEl = document.getElementById('app-header');
 const navEl = document.getElementById('bottom-nav');
 let currentUser = null;
 
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
+
 function setHeader({ title = '', back = false, actions = '' } = {}) {
   headerEl.innerHTML = `
     ${back ? `<button type="button" class="icon-btn" id="back-btn" aria-label="返回">${icon('arrowLeft')}</button>` : ''}
