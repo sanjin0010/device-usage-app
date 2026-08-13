@@ -3,7 +3,7 @@
   "appName": "设备使用登记",
   "webDir": "public",
   "server": {
-    "url": "https://1d6083b7bce9f1.lhr.life",
+    "url": "https://wings-wheels-rotary-oem.trycloudflare.com",
     "cleartext": true
   }
 }

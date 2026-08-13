@@ -1,0 +1,13 @@
+name = "device-usage-app"
+main = "src/worker.js"
+compatibility_date = "2026-08-13"
+workers_dev = true
+
+[assets]
+directory = "../public"
+binding = "ASSETS"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "device-usage"
+database_id = "REPLACE_WITH_D1_DATABASE_ID"
