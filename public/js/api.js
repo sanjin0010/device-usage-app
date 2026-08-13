@@ -1,0 +1,62 @@
+const TOKEN_KEY = 'device_app_token';
+
+export class ApiError extends Error {
+  constructor(message, status) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+  }
+}
+
+export function getToken() {
+  return localStorage.getItem(TOKEN_KEY);
+}
+
+export function setToken(token) {
+  if (token) {
+    localStorage.setItem(TOKEN_KEY, token);
+  } else {
+    localStorage.removeItem(TOKEN_KEY);
+  }
+}
+
+export function clearToken() {
+  localStorage.removeItem(TOKEN_KEY);
+}
+
+async function request(path, { method = 'GET', body } = {}) {
+  const headers = {};
+  const token = getToken();
+  if (token) headers.Authorization = `Bearer ${token}`;
+  if (body) headers['Content-Type'] = 'application/json';
+
+  const res = await fetch(path, {
+    method,
+    headers,
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    if (res.status === 401 && !path.startsWith('/api/auth/')) {
+      clearToken();
+      window.location.hash = '#/login';
+    }
+    throw new ApiError(data.error || '请求失败，请稍后重试', res.status);
+  }
+  return data;
+}
+
+export const api = {
+  register: (payload) => request('/api/auth/register', { method: 'POST', body: payload }),
+  login: (payload) => request('/api/auth/login', { method: 'POST', body: payload }),
+  logout: () => request('/api/auth/logout', { method: 'POST' }),
+  me: () => request('/api/auth/me'),
+  devices: (search = '') => request(`/api/devices${search ? `?search=${encodeURIComponent(search)}` : ''}`),
+  device: (id) => request(`/api/devices/${encodeURIComponent(id)}`),
+  createDevice: (payload) => request('/api/devices', { method: 'POST', body: payload }),
+  updateDevice: (id, payload) => request(`/api/devices/${encodeURIComponent(id)}`, { method: 'PUT', body: payload }),
+  deleteDevice: (id) => request(`/api/devices/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+  startUse: (id, payload) => request(`/api/devices/${encodeURIComponent(id)}/start-use`, { method: 'POST', body: payload }),
+  endUse: (id) => request(`/api/usage/${encodeURIComponent(id)}/end`, { method: 'POST' }),
+  myUsage: () => request('/api/me/usage'),
+};
