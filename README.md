@@ -13,6 +13,10 @@ npm start
 
 应用已支持 PWA：在手机浏览器打开后，可通过“添加到主屏幕”安装为 App 体验；也可用 PWABuilder 等工具打包成 APK 分享。
 
+## 打包 Android APK
+
+仓库内置 GitHub Actions 工作流 `.github/workflows/build-apk.yml`：推送 `main` 分支后，Actions 会用 Capacitor 自动构建 `app-debug.apk`，产物可在 Actions 运行页面的 Artifacts 中下载。
+
 ## 演示账号
 
 - 管理员：`admin / admin123`

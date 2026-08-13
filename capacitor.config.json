@@ -1,0 +1,9 @@
+{
+  "appId": "com.sanjin0010.deviceusage",
+  "appName": "设备使用登记",
+  "webDir": "public",
+  "server": {
+    "url": "https://0a236bc9837e3e.lhr.life",
+    "cleartext": true
+  }
+}

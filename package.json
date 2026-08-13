@@ -6,12 +6,19 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "node --test tests/api.test.js"
+    "test": "node --test tests/api.test.js",
+    "apk:sync": "npx cap sync android",
+    "apk:build": "cd android && gradlew assembleDebug"
   },
   "engines": {
     "node": ">=22.5"
   },
   "dependencies": {
+    "@capacitor/android": "^7.0.0",
+    "@capacitor/core": "^7.0.0",
     "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.0.0"
   }
 }
