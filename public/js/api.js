@@ -1,4 +1,24 @@
 const TOKEN_KEY = 'device_app_token';
+const BASE_KEY = 'device_server_base';
+
+export function getServerBase() {
+  const saved = localStorage.getItem(BASE_KEY);
+  return saved ? saved.replace(/\/+$/, '') : '';
+}
+
+export function setServerBase(url) {
+  const clean = String(url || '').trim().replace(/\/+$/, '');
+  if (clean) {
+    localStorage.setItem(BASE_KEY, clean);
+  } else {
+    localStorage.removeItem(BASE_KEY);
+  }
+}
+
+function resolve(path) {
+  const base = getServerBase();
+  return base ? `${base}${path}` : path;
+}
 
 export class ApiError extends Error {
   constructor(message, status) {
@@ -37,7 +57,7 @@ async function request(path, { method = 'GET', body } = {}) {
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    if (res.status === 401 && !path.startsWith('/api/auth/')) {
+    if (res.status === 401 && !String(path).includes('/api/auth/')) {
       clearToken();
       window.location.hash = '#/login';
     }
@@ -47,16 +67,16 @@ async function request(path, { method = 'GET', body } = {}) {
 }
 
 export const api = {
-  register: (payload) => request('/api/auth/register', { method: 'POST', body: payload }),
-  login: (payload) => request('/api/auth/login', { method: 'POST', body: payload }),
-  logout: () => request('/api/auth/logout', { method: 'POST' }),
-  me: () => request('/api/auth/me'),
-  devices: (search = '') => request(`/api/devices${search ? `?search=${encodeURIComponent(search)}` : ''}`),
-  device: (id) => request(`/api/devices/${encodeURIComponent(id)}`),
-  createDevice: (payload) => request('/api/devices', { method: 'POST', body: payload }),
-  updateDevice: (id, payload) => request(`/api/devices/${encodeURIComponent(id)}`, { method: 'PUT', body: payload }),
-  deleteDevice: (id) => request(`/api/devices/${encodeURIComponent(id)}`, { method: 'DELETE' }),
-  startUse: (id, payload) => request(`/api/devices/${encodeURIComponent(id)}/start-use`, { method: 'POST', body: payload }),
-  endUse: (id) => request(`/api/usage/${encodeURIComponent(id)}/end`, { method: 'POST' }),
-  myUsage: () => request('/api/me/usage'),
+  register: (payload) => request(resolve('/api/auth/register'), { method: 'POST', body: payload }),
+  login: (payload) => request(resolve('/api/auth/login'), { method: 'POST', body: payload }),
+  logout: () => request(resolve('/api/auth/logout'), { method: 'POST' }),
+  me: () => request(resolve('/api/auth/me')),
+  devices: (search = '') => request(resolve(`/api/devices${search ? `?search=${encodeURIComponent(search)}` : ''}`)),
+  device: (id) => request(resolve(`/api/devices/${encodeURIComponent(id)}`)),
+  createDevice: (payload) => request(resolve('/api/devices'), { method: 'POST', body: payload }),
+  updateDevice: (id, payload) => request(resolve(`/api/devices/${encodeURIComponent(id)}`), { method: 'PUT', body: payload }),
+  deleteDevice: (id) => request(resolve(`/api/devices/${encodeURIComponent(id)}`), { method: 'DELETE' }),
+  startUse: (id, payload) => request(resolve(`/api/devices/${encodeURIComponent(id)}/start-use`), { method: 'POST', body: payload }),
+  endUse: (id) => request(resolve(`/api/usage/${encodeURIComponent(id)}/end`), { method: 'POST' }),
+  myUsage: () => request(resolve('/api/me/usage')),
 };

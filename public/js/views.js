@@ -1,4 +1,4 @@
-import { api, setToken, clearToken } from './api.js';
+import { api, setToken, clearToken, getServerBase, setServerBase } from './api.js';
 import { escapeHtml, icon, toast, formatDateTime, toLocalInputValue, localValueToIso, statusMeta, openSheet } from './ui.js';
 
 let currentUser = null;
@@ -49,6 +49,7 @@ export function loginView() {
           <button type="button" class="demo-btn" data-username="staff" data-password="staff123">${icon('user')} 员工演示</button>
         </div>
       </form>
+      <button id="login-server-btn" class="link-btn">${icon('settings')} 服务器设置</button>
       <button id="goto-register" class="link-btn">注册新账号</button>
     </div>`);
 
@@ -81,6 +82,7 @@ export function loginView() {
   document.getElementById('goto-register').addEventListener('click', () => {
     location.hash = '#/register';
   });
+  document.getElementById('login-server-btn').addEventListener('click', openServerSheet);
 }
 
 export function registerView() {
@@ -395,6 +397,49 @@ export function openAddDeviceSheet() {
   });
 }
 
+function openServerSheet() {
+  const sheet = openSheet({
+    title: '服务器地址',
+    content: `
+      <form id="server-form" class="form">
+        <label class="field"><span>服务器地址</span><input name="serverBase" value="${escapeHtml(getServerBase() || '')}" placeholder="https://example.com" required></label>
+        <button type="submit" class="btn btn-primary btn-block">${icon('check')} 保存并测试</button>
+        <button type="button" id="server-reset" class="btn btn-ghost btn-block">恢复默认</button>
+      </form>`,
+  });
+
+  const form = document.getElementById('server-form');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const url = form.serverBase.value.trim().replace(/\/+$/, '');
+    if (!/^https?:\/\//i.test(url)) {
+      toast('请输入以 http:// 或 https:// 开头的地址', 'error');
+      return;
+    }
+    const submit = form.querySelector('button[type="submit"]');
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 8000);
+    submit.disabled = true;
+    try {
+      await fetch(`${url}/`, { signal: controller.signal });
+      setServerBase(url);
+      sheet.close();
+      toast('服务器地址已保存');
+    } catch {
+      toast('无法连接该地址，请检查后重试', 'error');
+      submit.disabled = false;
+    } finally {
+      clearTimeout(timer);
+    }
+  });
+
+  document.getElementById('server-reset').addEventListener('click', () => {
+    setServerBase('');
+    sheet.close();
+    toast('已恢复默认地址');
+  });
+}
+
 function usageCard(usage) {
   const endLabel = usage.status === 'active'
     ? `${formatDateTime(usage.plannedEndTime)}（预计）`
@@ -474,10 +519,12 @@ export function profileView() {
     </section>
     <ul class="menu-list">
       <li><a class="menu-item" href="#/usage">${icon('clipboard')} 我的使用记录</a></li>
+      <li><button type="button" class="menu-item" id="server-settings-btn">${icon('settings')} 服务器地址</button></li>
       ${user.role === 'admin' ? `<li><button type="button" class="menu-item" id="menu-add-device">${icon('plus')} 新增设备</button></li>` : ''}
       <li><button type="button" class="menu-item danger" id="logout-btn">${icon('logOut')} 退出登录</button></li>
     </ul>`);
 
+  document.getElementById('server-settings-btn').addEventListener('click', openServerSheet);
   document.getElementById('menu-add-device')?.addEventListener('click', openAddDeviceSheet);
   document.getElementById('logout-btn').addEventListener('click', async () => {
     try {

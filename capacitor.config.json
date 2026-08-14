@@ -3,7 +3,6 @@
   "appName": "设备使用登记",
   "webDir": "public",
   "server": {
-    "url": "https://console-hook-redhead-jenny.trycloudflare.com",
     "cleartext": true
   }
 }

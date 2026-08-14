@@ -17,6 +17,8 @@ npm start
 
 仓库内置 GitHub Actions 工作流 `.github/workflows/build-apk.yml`：推送 `main` 分支后，Actions 会用 Capacitor 自动构建 `app-debug.apk`，产物可在 Actions 运行页面的 Artifacts 中下载。
 
+APK 已内置前端页面：安装后若后端地址变化，打开 App 在登录页或“我的 → 服务器地址”里填写新地址即可，无需重新打包。
+
 ## 演示账号
 
 - 管理员：`admin / admin123`
